@@ -1,0 +1,84 @@
+graph TB
+    subgraph Device["📱 iOS Device"]
+        subgraph RNApp["React Native App"]
+            UI["UI Layer\n(Screens / Components)"]
+            Redux["Redux Toolkit Store\n+ RTK Query"]
+            MMKV["MMKV\n(Settings / Subscription)"]
+            WDB["WatermelonDB\n(Logs / Stats)"]
+        end
+
+        subgraph Extensions["Native iOS Extensions"]
+            SCB["Safari Content Blocker\n(NEContentBlockerManager)"]
+            NE["Network Extension\n(NEPacketTunnelProvider)\nVPN Firewall"]
+            Widget["WidgetKit Widget\n(Home Screen Stats)"]
+            ShareExt["Share Extension\n(Allow Site / Report)"]
+        end
+
+        AppGroup["App Group\nShared Container\n(rule JSON, stats)"]
+    end
+
+    subgraph Backend["☁️ Backend (Railway)"]
+        API["Fastify API\nNode.js 20"]
+        PG["PostgreSQL 16\n(Filter metadata\nReport queue)"]
+        Queue["BullMQ / Redis\n(Report processing)"]
+    end
+
+    subgraph CDN["🌐 Cloudflare"]
+        R2["R2 Object Store\n(Compiled rule JSON)"]
+        Workers["Cloudflare Workers\n(Delta diff logic)"]
+    end
+
+    subgraph ThirdParty["Third-party Services"]
+        RC["RevenueCat\n(StoreKit 2 Entitlements)"]
+        Sentry["Sentry\n(Crash Reporting)"]
+        Mixpanel["Mixpanel\n(Analytics)"]
+        FCM["Firebase FCM\n(Push Notifications)"]
+        iCloud["iCloud KV Store\n(Settings Sync)"]
+    end
+
+    subgraph CI["🔄 CI/CD (GitHub Actions)"]
+        GHA["GitHub Actions\nESLint · Jest · Gradle"]
+        Fastlane["Fastlane\niOS TestFlight\nAndroid Internal Track"]
+    end
+
+    UI <--> Redux
+    Redux <--> MMKV
+    Redux <--> WDB
+    RNApp -- "SFContentBlockerManager\nreloadContentBlocker" --> SCB
+    RNApp -- "NEVPNManager\nstart/stop" --> NE
+    RNApp -- "App Group writes" --> AppGroup
+    Widget -- "reads" --> AppGroup
+    NE -- "DNS filtering" --> AppGroup
+    SCB -- "rule JSON" --> AppGroup
+
+    Redux -- "RTK Query" --> API
+    API --> PG
+    API --> Queue
+    API -- "publish" --> R2
+
+    RNApp -- "filter update check" --> Workers
+    Workers -- "delta diff" --> R2
+    R2 -- "compiled rules" --> SCB
+
+    Redux <--> RC
+    Redux --> Sentry
+    Redux --> Mixpanel
+    FCM -- "push" --> RNApp
+    RNApp <--> iCloud
+
+    GHA --> Fastlane
+    Fastlane -- "distribute" --> Device
+
+    classDef native fill:#f0a500,color:#000
+    classDef rn fill:#61dafb,color:#000
+    classDef backend fill:#68d391,color:#000
+    classDef cdn fill:#f6ad55,color:#000
+    classDef third fill:#b794f4,color:#000
+    classDef ci fill:#fc8181,color:#000
+
+    class SCB,NE,Widget,ShareExt native
+    class UI,Redux,MMKV,WDB rn
+    class API,PG,Queue backend
+    class R2,Workers cdn
+    class RC,Sentry,Mixpanel,FCM,iCloud third
+    class GHA,Fastlane ci
