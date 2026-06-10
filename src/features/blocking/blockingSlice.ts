@@ -72,6 +72,16 @@ const blockingSlice = createSlice({
         list.enabled = !list.enabled;
       }
     },
+    updateFilterListTimestamp(
+      state,
+      action: PayloadAction<{ id: string; lastUpdated: string }>,
+    ) {
+      const list = state.filterLists.find(l => l.id === action.payload.id);
+      if (list) {
+        list.lastUpdated = action.payload.lastUpdated;
+      }
+      state.lastUpdated = action.payload.lastUpdated;
+    },
   },
   extraReducers: builder => {
     builder
