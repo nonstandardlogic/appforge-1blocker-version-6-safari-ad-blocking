@@ -6,12 +6,20 @@ import {AppState, type AppStateStatus, Linking} from 'react-native';
 import {SetupWizardScreen} from '../../../features/onboarding/screens/SetupWizardScreen';
 import onboardingReducer from '../../../features/onboarding/onboardingSlice';
 
-const mockCheckExtensionEnabled = jest.fn<Promise<boolean>, [string]>();
-
 jest.mock('../../../native/modules/ContentBlockerModule', () => ({
   __esModule: true,
-  default: {checkExtensionEnabled: mockCheckExtensionEnabled},
+  default: {checkExtensionEnabled: jest.fn()},
 }));
+
+const mockCheckExtensionEnabled = (
+  jest.requireMock('../../../native/modules/ContentBlockerModule') as {
+    default: {
+      checkExtensionEnabled: jest.MockedFunction<
+        (bundleId: string) => Promise<boolean>
+      >;
+    };
+  }
+).default.checkExtensionEnabled;
 
 type OnboardingOverride = Partial<{
   currentStep: 'welcome' | 'enable' | 'complete';
