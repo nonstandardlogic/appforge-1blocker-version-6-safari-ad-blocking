@@ -10,6 +10,10 @@ import {
   DEFAULT_SETTINGS,
 } from '../../../features/onboarding/migrationRunner';
 
+// jest.mock() is hoisted before imports, so imported variables are out-of-scope.
+// The 'mock' prefix is the documented exemption that bypasses this restriction.
+const mockCurrentSchemaVersion = 1;
+
 jest.mock('../../../native/modules/SettingsPersistenceModule', () => ({
   __esModule: true,
   default: {
@@ -17,7 +21,7 @@ jest.mock('../../../native/modules/SettingsPersistenceModule', () => ({
     loadSettings: jest.fn().mockResolvedValue(null),
     loadAllowlistFromCloud: jest.fn().mockResolvedValue([]),
     saveAllowlistToCloud: jest.fn().mockResolvedValue(undefined),
-    getSchemaVersion: jest.fn().mockResolvedValue(CURRENT_SCHEMA_VERSION),
+    getSchemaVersion: jest.fn().mockResolvedValue(mockCurrentSchemaVersion),
     setSchemaVersion: jest.fn().mockResolvedValue(undefined),
   },
 }));
