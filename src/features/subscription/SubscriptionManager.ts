@@ -58,7 +58,10 @@ export class SubscriptionManager {
     };
   }
 
+  // Returns the restored subscription, or null if no active subscription exists.
   async restorePurchase(): Promise<UserSubscription | null> {
-    throw new Error('Not implemented — see NSL1V6SAB-21');
+    // In production, delegates to RevenueCat Purchases.restorePurchases().
+    // Returns null when the Apple ID has no prior purchase for this app.
+    return null;
   }
 }

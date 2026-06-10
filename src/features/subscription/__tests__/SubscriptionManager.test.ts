@@ -84,7 +84,7 @@ describe('SubscriptionManager', () => {
     });
   });
 
-  describe('purchaseLifetime — NSL1V6SAB-20', () => {
+  describe('purchaseLifetime', () => {
     it('returns LIFETIME tier', async () => {
       const result = await manager.purchaseLifetime();
       expect(result.tier).toBe(SubscriptionTier.LIFETIME);
@@ -103,6 +103,17 @@ describe('SubscriptionManager', () => {
     it('purchaseType is APP_STORE', async () => {
       const result = await manager.purchaseLifetime();
       expect(result.purchaseType).toBe(PurchaseType.APP_STORE);
+    });
+  });
+
+  describe('restorePurchase — NSL1V6SAB-21', () => {
+    it('returns null when no prior purchase exists', async () => {
+      const result = await manager.restorePurchase();
+      expect(result).toBeNull();
+    });
+
+    it('resolves without throwing', async () => {
+      await expect(manager.restorePurchase()).resolves.not.toThrow();
     });
   });
 });

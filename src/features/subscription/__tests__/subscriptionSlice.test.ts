@@ -6,6 +6,7 @@ import reducer, {
   resetRestoreStatus,
   purchaseSubscription,
   purchaseLifetime,
+  restorePurchase,
 } from '../subscriptionSlice';
 import { SubscriptionTier, PurchaseType } from '../types';
 
@@ -197,5 +198,64 @@ describe('subscriptionSlice — NSL1V6SAB-20: purchaseLifetime thunk', () => {
     );
     expect(state.purchaseStatus).toBe('error');
     expect(state.error).toBe('Payment declined');
+  });
+});
+
+describe('subscriptionSlice — NSL1V6SAB-21: restorePurchase thunk', () => {
+  it('sets restoreStatus to restoring when pending', () => {
+    const state = reducer(undefined, restorePurchase.pending('', undefined, undefined));
+    expect(state.restoreStatus).toBe('restoring');
+    expect(state.error).toBeNull();
+  });
+
+  it('sets restoreStatus to success and updates subscription when purchase found', () => {
+    const restoredSub = {
+      tier: SubscriptionTier.ANNUAL,
+      expiresAt: '2027-06-10T00:00:00.000Z',
+      isLifetime: false,
+      purchaseType: PurchaseType.RESTORED,
+    };
+    const state = reducer(undefined, restorePurchase.fulfilled(restoredSub, '', undefined));
+    expect(state.restoreStatus).toBe('success');
+    expect(state.subscription.tier).toBe(SubscriptionTier.ANNUAL);
+    expect(state.subscription.purchaseType).toBe(PurchaseType.RESTORED);
+  });
+
+  it('sets restoreStatus to success but keeps FREE tier when no purchase found (null)', () => {
+    const state = reducer(undefined, restorePurchase.fulfilled(null, '', undefined));
+    expect(state.restoreStatus).toBe('success');
+    expect(state.subscription.tier).toBe(SubscriptionTier.FREE);
+  });
+
+  it('restores LIFETIME subscription with isLifetime=true and no expiry', () => {
+    const restoredLifetime = {
+      tier: SubscriptionTier.LIFETIME,
+      expiresAt: null,
+      isLifetime: true,
+      purchaseType: PurchaseType.RESTORED,
+    };
+    const state = reducer(undefined, restorePurchase.fulfilled(restoredLifetime, '', undefined));
+    expect(state.subscription.tier).toBe(SubscriptionTier.LIFETIME);
+    expect(state.subscription.isLifetime).toBe(true);
+    expect(state.subscription.expiresAt).toBeNull();
+  });
+
+  it('sets restoreStatus to error when restore fails', () => {
+    const state = reducer(
+      undefined,
+      restorePurchase.rejected(new Error('Network unavailable'), '', undefined)
+    );
+    expect(state.restoreStatus).toBe('error');
+    expect(state.error).toBe('Network unavailable');
+  });
+
+  it('clears error when restore is re-attempted (pending)', () => {
+    const errorState = reducer(
+      undefined,
+      restorePurchase.rejected(new Error('timeout'), '', undefined)
+    );
+    const retryState = reducer(errorState, restorePurchase.pending('', undefined, undefined));
+    expect(retryState.error).toBeNull();
+    expect(retryState.restoreStatus).toBe('restoring');
   });
 });
