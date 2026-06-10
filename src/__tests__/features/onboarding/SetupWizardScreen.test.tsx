@@ -15,7 +15,7 @@ const mockCheckExtensionEnabled = (
   jest.requireMock('../../../native/modules/ContentBlockerModule') as {
     default: {
       checkExtensionEnabled: jest.MockedFunction<
-        (bundleId: string) => Promise<boolean>
+        (_bundleId: string) => Promise<boolean>
       >;
     };
   }
