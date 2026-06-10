@@ -15,6 +15,21 @@ jest.mock('../../../native/modules/BlockingStatsModule', () => ({
   },
 }));
 
+jest.mock('../../../native/modules/ContentBlockerModule', () => ({
+  __esModule: true,
+  default: {
+    checkExtensionEnabled: jest.fn(),
+  },
+}));
+
+const mockGetStats = jest.mocked(BlockingStatsModule.getStats);
+
+const mockCheckExtensionEnabled = (
+  jest.requireMock('../../../native/modules/ContentBlockerModule') as {
+    default: {checkExtensionEnabled: jest.Mock};
+  }
+).default.checkExtensionEnabled;
+
 function makeStore() {
   return configureStore({
     reducer: {
@@ -32,10 +47,10 @@ function renderDashboard() {
   );
 }
 
-const mockGetStats = jest.mocked(BlockingStatsModule.getStats);
-
 beforeEach(() => {
   mockGetStats.mockReset();
+  mockCheckExtensionEnabled.mockReset();
+  mockCheckExtensionEnabled.mockResolvedValue(true);
 });
 
 describe('AC1 — counter starts at zero after setup wizard', () => {
