@@ -6,12 +6,13 @@ import {configureStore} from '@reduxjs/toolkit';
 import {DashboardScreen} from '../../../features/onboarding/screens/DashboardScreen';
 import statsReducer from '../../../features/onboarding/statsSlice';
 import onboardingReducer from '../../../features/onboarding/onboardingSlice';
-
-const mockGetStats = jest.fn();
+import BlockingStatsModule from '../../../native/modules/BlockingStatsModule';
 
 jest.mock('../../../native/modules/BlockingStatsModule', () => ({
   __esModule: true,
-  default: {getStats: mockGetStats},
+  default: {
+    getStats: jest.fn(),
+  },
 }));
 
 function makeStore() {
@@ -30,6 +31,8 @@ function renderDashboard() {
     </Provider>,
   );
 }
+
+const mockGetStats = jest.mocked(BlockingStatsModule.getStats);
 
 beforeEach(() => {
   mockGetStats.mockReset();
