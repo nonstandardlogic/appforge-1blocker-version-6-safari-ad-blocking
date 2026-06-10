@@ -5,6 +5,7 @@ import reducer, {
   resetPurchaseStatus,
   resetRestoreStatus,
   purchaseSubscription,
+  purchaseLifetime,
 } from '../subscriptionSlice';
 import { SubscriptionTier, PurchaseType } from '../types';
 
@@ -157,5 +158,44 @@ describe('subscriptionSlice — NSL1V6SAB-19: purchaseSubscription thunk', () =>
     const retryState = reducer(errorState, purchaseSubscription.pending('', 'MONTHLY', undefined));
     expect(retryState.error).toBeNull();
     expect(retryState.purchaseStatus).toBe('purchasing');
+  });
+});
+
+describe('subscriptionSlice — NSL1V6SAB-20: purchaseLifetime thunk', () => {
+  const lifetimeSub = {
+    tier: SubscriptionTier.LIFETIME,
+    expiresAt: null,
+    isLifetime: true,
+    purchaseType: PurchaseType.APP_STORE,
+  };
+
+  it('sets purchaseStatus to purchasing when pending', () => {
+    const state = reducer(undefined, purchaseLifetime.pending('', undefined, undefined));
+    expect(state.purchaseStatus).toBe('purchasing');
+    expect(state.error).toBeNull();
+  });
+
+  it('sets LIFETIME tier, isLifetime=true, expiresAt=null on fulfilled', () => {
+    let state = reducer(undefined, showPaywall());
+    state = reducer(state, purchaseLifetime.fulfilled(lifetimeSub, '', undefined));
+    expect(state.purchaseStatus).toBe('success');
+    expect(state.subscription.tier).toBe(SubscriptionTier.LIFETIME);
+    expect(state.subscription.isLifetime).toBe(true);
+    expect(state.subscription.expiresAt).toBeNull();
+  });
+
+  it('closes paywall after successful lifetime purchase', () => {
+    let state = reducer(undefined, showPaywall());
+    state = reducer(state, purchaseLifetime.fulfilled(lifetimeSub, '', undefined));
+    expect(state.paywallVisible).toBe(false);
+  });
+
+  it('sets error status when lifetime purchase rejected', () => {
+    const state = reducer(
+      undefined,
+      purchaseLifetime.rejected(new Error('Payment declined'), '', undefined)
+    );
+    expect(state.purchaseStatus).toBe('error');
+    expect(state.error).toBe('Payment declined');
   });
 });

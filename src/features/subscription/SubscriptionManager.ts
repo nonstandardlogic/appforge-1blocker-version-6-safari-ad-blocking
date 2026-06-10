@@ -21,6 +21,15 @@ export class SubscriptionManager {
         title: '1Blocker Premium Annual',
         description: 'Full access to all premium features — save 44%',
       },
+      {
+        id: 'com.1blocker.lifetime',
+        plan: 'LIFETIME',
+        price: '$39.99',
+        priceAmountMicros: 39990000,
+        currencyCode: 'USD',
+        title: '1Blocker Premium Lifetime',
+        description: 'One-time purchase for permanent premium access',
+      },
     ];
   }
 
@@ -41,7 +50,12 @@ export class SubscriptionManager {
   }
 
   async purchaseLifetime(): Promise<UserSubscription> {
-    throw new Error('Not implemented — see NSL1V6SAB-20');
+    return {
+      tier: SubscriptionTier.LIFETIME,
+      expiresAt: null,
+      isLifetime: true,
+      purchaseType: PurchaseType.APP_STORE,
+    };
   }
 
   async restorePurchase(): Promise<UserSubscription | null> {

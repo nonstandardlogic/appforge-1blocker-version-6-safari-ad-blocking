@@ -9,12 +9,13 @@ describe('SubscriptionManager', () => {
   });
 
   describe('getPaywallProducts', () => {
-    it('returns both MONTHLY and ANNUAL products', async () => {
+    it('returns MONTHLY, ANNUAL and LIFETIME products', async () => {
       const products = await manager.getPaywallProducts();
-      expect(products).toHaveLength(2);
+      expect(products).toHaveLength(3);
       const plans = products.map(p => p.plan);
       expect(plans).toContain('MONTHLY');
       expect(plans).toContain('ANNUAL');
+      expect(plans).toContain('LIFETIME');
     });
 
     it('each product has required fields', async () => {
@@ -33,6 +34,13 @@ describe('SubscriptionManager', () => {
       const monthly = products.find(p => p.plan === 'MONTHLY')!;
       const annual = products.find(p => p.plan === 'ANNUAL')!;
       expect(annual.priceAmountMicros).toBeLessThan(monthly.priceAmountMicros * 12);
+    });
+
+    it('LIFETIME product is priced at $39.99', async () => {
+      const products = await manager.getPaywallProducts();
+      const lifetime = products.find(p => p.plan === 'LIFETIME')!;
+      expect(lifetime.price).toBe('$39.99');
+      expect(lifetime.priceAmountMicros).toBe(39990000);
     });
   });
 
@@ -73,6 +81,28 @@ describe('SubscriptionManager', () => {
       const result = await manager.purchaseSubscription('MONTHLY');
       expect(result.expiresAt).toBeTruthy();
       expect(new Date(result.expiresAt!).toISOString()).toBe(result.expiresAt);
+    });
+  });
+
+  describe('purchaseLifetime — NSL1V6SAB-20', () => {
+    it('returns LIFETIME tier', async () => {
+      const result = await manager.purchaseLifetime();
+      expect(result.tier).toBe(SubscriptionTier.LIFETIME);
+    });
+
+    it('sets isLifetime to true', async () => {
+      const result = await manager.purchaseLifetime();
+      expect(result.isLifetime).toBe(true);
+    });
+
+    it('expiresAt is null (lifetime never expires)', async () => {
+      const result = await manager.purchaseLifetime();
+      expect(result.expiresAt).toBeNull();
+    });
+
+    it('purchaseType is APP_STORE', async () => {
+      const result = await manager.purchaseLifetime();
+      expect(result.purchaseType).toBe(PurchaseType.APP_STORE);
     });
   });
 });
