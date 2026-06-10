@@ -19,3 +19,11 @@ export interface FilterList {
   rulesCount: number;
   lastUpdated: string;
 }
+
+export interface TrackerBlockEvent {
+  id: string;
+  trackerDomain: string;
+  hostPage: string;
+  blockedAt: string;
+  category: 'TRACKER' | 'AD';
+}

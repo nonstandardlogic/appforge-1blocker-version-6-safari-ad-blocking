@@ -20,28 +20,28 @@ const AD_NETWORK_RULES: BlockingRule[] = [
   { trigger: { 'url-filter': '.*adserv(er|ice)' }, action: { type: 'block' } },
 ];
 
-// Cross-site tracker rules (AC3)
+// Cross-site tracker rules covering Cover Your Tracks top trackers (AC1)
 const TRACKER_RULES: BlockingRule[] = [
-  {
-    trigger: { 'url-filter': '.*google-analytics\\.com/analytics\\.js' },
-    action: { type: 'block' },
-  },
-  {
-    trigger: { 'url-filter': '.*google-analytics\\.com/gtag' },
-    action: { type: 'block' },
-  },
-  {
-    trigger: { 'url-filter': '.*\\.facebook\\.com/tr\\?' },
-    action: { type: 'block' },
-  },
-  {
-    trigger: { 'url-filter': 'https?://ads\\.twitter\\.com' },
-    action: { type: 'block' },
-  },
-  {
-    trigger: { 'url-filter': '.*\\.hotjar\\.com' },
-    action: { type: 'block' },
-  },
+  { trigger: { 'url-filter': '.*google-analytics\\.com' }, action: { type: 'block' } },
+  { trigger: { 'url-filter': '.*googletagmanager\\.com' }, action: { type: 'block' } },
+  { trigger: { 'url-filter': '.*\\.facebook\\.com/tr\\?' }, action: { type: 'block' } },
+  { trigger: { 'url-filter': '.*connect\\.facebook\\.net' }, action: { type: 'block' } },
+  { trigger: { 'url-filter': 'https?://ads\\.twitter\\.com' }, action: { type: 'block' } },
+  { trigger: { 'url-filter': '.*snap\\.licdn\\.com' }, action: { type: 'block' } },
+  { trigger: { 'url-filter': '.*\\.linkedin\\.com/px' }, action: { type: 'block' } },
+  { trigger: { 'url-filter': '.*ct\\.pinterest\\.com' }, action: { type: 'block' } },
+  { trigger: { 'url-filter': '.*sc-static\\.net/scevent' }, action: { type: 'block' } },
+  { trigger: { 'url-filter': '.*analytics\\.tiktok\\.com' }, action: { type: 'block' } },
+  { trigger: { 'url-filter': '.*\\.clarity\\.ms' }, action: { type: 'block' } },
+  { trigger: { 'url-filter': '.*bat\\.bing\\.com' }, action: { type: 'block' } },
+  { trigger: { 'url-filter': '.*\\.omtrdc\\.net' }, action: { type: 'block' } },
+  { trigger: { 'url-filter': '.*api\\.segment\\.io' }, action: { type: 'block' } },
+  { trigger: { 'url-filter': '.*cdn\\.segment\\.com' }, action: { type: 'block' } },
+  { trigger: { 'url-filter': '.*api2\\.amplitude\\.com' }, action: { type: 'block' } },
+  { trigger: { 'url-filter': '.*\\.hotjar\\.com' }, action: { type: 'block' } },
+  { trigger: { 'url-filter': '.*\\.criteo\\.com' }, action: { type: 'block' } },
+  { trigger: { 'url-filter': '.*static\\.chartbeat\\.com' }, action: { type: 'block' } },
+  { trigger: { 'url-filter': '.*api\\.mixpanel\\.com' }, action: { type: 'block' } },
 ];
 
 // Cosmetic rules: collapse empty ad slots so no blank white spaces remain (AC2)
@@ -107,5 +107,13 @@ export class BlockingEngine {
 
   hasCosmeticRules(): boolean {
     return this.cosmeticRules.length > 0;
+  }
+
+  extractDomain(url: string): string {
+    try {
+      return new URL(url).hostname;
+    } catch {
+      return url;
+    }
   }
 }
