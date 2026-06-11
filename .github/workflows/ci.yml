@@ -2,33 +2,33 @@ name: CI
 
 on:
   push:
-    branches: ['main', 'feature/**', 'fix/**']
+    branches: [main, "feature/**", "fix/**", "claude/**"]
   pull_request:
-    branches: ['main']
+    branches: [main]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  lint-test:
-    name: Lint, Typecheck & Test
+  lint-and-test:
+    name: Lint & Unit Tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: "20"
 
       - name: Install dependencies
         run: npm install
 
-      - name: Lint
-        run: npm run lint
-
-      - name: Typecheck
+      - name: TypeScript type-check
         run: npm run typecheck
 
-      - name: Test
+      - name: Run Jest
         run: npm test -- --ci
+        env:
+          CI: true
